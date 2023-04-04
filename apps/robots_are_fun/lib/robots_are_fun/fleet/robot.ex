@@ -12,8 +12,8 @@ defmodule RobotsAreFun.Fleet.Robot do
 
   * `:id` - a simple identifier for the robot
   * `:battery_level` - from 0 to 100
-  * `:x` - the robot's current `x` position, from 0 to 100
-  * `:y` - the robot's current `y` position, fom 0 to 100
+  * `:x` - the robot's current `x` position
+  * `:y` - the robot's current `y` position
   """
   @type t() :: %__MODULE__{
     id: binary(),

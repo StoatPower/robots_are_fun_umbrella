@@ -11,14 +11,36 @@ defmodule RobotsAreFun.Inventory.Load do
   A load has the following properties:
 
   * `:id` - a simple identifier for the load
-  * `:x` - the load's current `x` position, from 0 to 100
-  * `:y` - the load's current `y` position, from 0 to 100
+  * `:x` - the load's current `x` position
+  * `:y` - the load's current `y` position
   """
   @type t() :: %__MODULE__{
           id: binary(),
           x: non_neg_integer(),
           y: non_neg_integer()
         }
+
+  @doc """
+  Creates a new load.
+  """
+  @spec new(integer() | binary(), number(), number()) :: {:ok, t()} | {:error, any()}
+  def new(id, x, y) when is_integer(id) do
+    id
+    |> Integer.to_string()
+    |> new(x, y)
+  end
+
+  def new(id, x, y)
+    when is_binary(id) and
+          is_integer(x) and
+          is_integer(y) and
+          x >= 0 and
+          y >= 0
+  do
+    {:ok, %__MODULE__{id: id, x: x, y: y}}
+  end
+
+  def new(_, _, _), do: {:error, "invalid load parameters"}
 
   # @doc """
   # Returns whether or not the load position is valid.

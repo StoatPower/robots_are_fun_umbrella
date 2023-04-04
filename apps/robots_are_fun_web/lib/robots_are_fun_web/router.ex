@@ -23,7 +23,7 @@ defmodule RobotsAreFunWeb.Router do
   scope "/api", RobotsAreFunWeb do
     pipe_through :api
 
-
+    post "/robots/closest", RobotController, :closest
   end
 
   # Other scopes may use custom stacks.
