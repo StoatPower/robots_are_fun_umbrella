@@ -12,7 +12,7 @@ defmodule RobotsAreFunWeb.RobotJSON do
   Renders a single robot.
   """
   def show(%{robot: robot}) do
-    %{data: data(robot)}
+    data(robot)
   end
 
   defp data(%Robot{} = robot) do
