@@ -66,9 +66,4 @@ defmodule RobotsAreFun.Fitness do
 
     {distance, overall_fitness}
   end
-
-  @spec robot_to_load_distance(Robot.t(), Load.t()) :: distance()
-  defp robot_to_load_distance(%Robot{} = robot, %Load{} = load),
-    do: Util.calculate_distance(position(robot), position(load))
-
 end
