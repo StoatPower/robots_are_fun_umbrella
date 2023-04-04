@@ -51,7 +51,7 @@ reasons:
 * Run tests (only a couple doctests): `mix test`.
 * Run the server `mix phx.server`.
 * Or interactively with `iex -S mix phx.server` allowing you to use the REPL with the running application.
-* Navigate to `http://localhost:5000` if you want to see the nifty auto-generated Phoenix 
+* Navigate to `http://localhost:5000` if you want to see the nifty auto-generated Phoenix splash-screen
 * Run the `curl` command to hit the API
 
 ```bash
