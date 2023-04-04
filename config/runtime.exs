@@ -19,6 +19,26 @@ if config_env() == :prod do
       You can generate one by calling: mix phx.gen.secret
       """
 
+  # ## Testing :prod config in :dev
+  #
+  # Begin by exporting settings in your terminal and then run
+  # the app using the prod environment.
+  #
+  # ```bash
+  # export X_MAX=100
+  # export Y_MAX=100
+  # MIX_ENV=prod mix phx.server
+  # ```
+  # config :robots_are_fun,
+  #   x_max: System.get_env("X_MAX") ||
+  #     raise """
+  #     environment variable X_MAX is missing.
+  #     """,
+  #   y_max: System.get_env("Y_MAX") ||
+  #     raise """
+  #     environment variable Y_MAX is missing.
+  #     """
+
   config :robots_are_fun_web, RobotsAreFunWeb.Endpoint,
     http: [
       # Enable IPv6 and bind on all interfaces.
@@ -70,3 +90,8 @@ if config_env() == :prod do
   #
   # Check `Plug.SSL` for all available options in `force_ssl`.
 end
+
+config :robots_are_fun,
+  x_max: System.get_env("X_MAX"),
+  y_max: System.get_env("Y_MAX"),
+  fleet_url: System.get_env("FLEET_URL")

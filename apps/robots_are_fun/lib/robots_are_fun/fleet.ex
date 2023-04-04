@@ -5,29 +5,62 @@ defmodule RobotsAreFun.Fleet do
   require Logger
   alias RobotsAreFun.Robot
 
-  @fleet_endpoint "https://60c8ed887dafc90017ffbd56.mockapi.io/robots"
+  @fleet_url_env "FLEET_URL"
 
+  @default_url "https://60c8ed887dafc90017ffbd56.mockapi.io/robots"
+
+  @doc """
+  Returns the fleet of `RobotsAreFun.Robot`s in a `map()`.
+  """
+  @spec get_fleet() :: {:ok, map()} | {:error, any()}
   def get_fleet() do
-    with {:ok, %HTTPoison.Response{body: body}} <- HTTPoison.get(@fleet_endpoint),
-         {:ok, fleet} <- Jason.decode(body)
-    do
-      process_fleet(fleet)
+    with {:ok, %HTTPoison.Response{body: body}} <- request_fleet(),
+         {:ok, fleet} <- Jason.decode(body) do
+      {:ok, process_fleet(fleet)}
     else
       error ->
         Logger.error(error)
-        raise "Error fetching robot fleet!"
+        {:error, "error fetching robot fleet"}
     end
   end
 
-  defp process_fleet(robots) when is_list(robots),
-    do: Enum.map(robots, &process_robot/1)
+  @spec request_fleet() :: {:ok, HTTPoison.Response.t | HTTPoison.AsyncResponse.t} | {:error, HTTPoison.Error.t}
+  defp request_fleet(),
+    do: HTTPoison.get(get_fleet_url())
 
+  @spec process_fleet(list()) :: map()
+  defp process_fleet(fleet) when is_list(fleet) do
+    Enum.reduce(fleet, Map.new(), fn next, acc ->
+      case process_robot(next) do
+        {:ok, robot} -> Map.put(acc, robot.robot_id, robot)
+        :error -> acc
+      end
+    end)
+  end
+
+  @spec process_robot(map()) :: {:ok, Robot.t()} | :error
   defp process_robot(robot) when is_map(robot) do
-    %Robot{
-      :robot_id => robot["robotId"],
-      :battery_level => robot["batteryLevel"],
-      :x => robot["x"],
-      :y => robot["y"]
-    }
+    with {:ok, robot_id} <- Access.fetch(robot, "robotId"),
+         {:ok, battery_level} <- Access.fetch(robot, "batteryLevel"),
+         {:ok, x} <- Access.fetch(robot, "x"),
+         {:ok, y} <- Access.fetch(robot, "y") do
+      {:ok,
+       %Robot{
+         robot_id: robot_id,
+         battery_level: battery_level,
+         x: x,
+         y: y
+       }}
+    end
+  end
+
+  @spec get_fleet_url() :: binary()
+  defp get_fleet_url() do
+    case System.fetch_env(@fleet_url_env) do
+      {:ok, url} -> url
+
+      :error ->
+        @default_url
+    end
   end
 end
