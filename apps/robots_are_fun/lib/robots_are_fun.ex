@@ -7,8 +7,10 @@ defmodule RobotsAreFun do
   if it comes from the database, an external API or others.
   """
   require Logger
-  import RobotsAreFun.Load, only: [valid_load?: 1]
-  alias RobotsAreFun.{Fitness, Fleet, Load, Robot, Util}
+  import RobotsAreFun.Inventory.Load, only: [valid_load?: 1]
+  alias RobotsAreFun.{Fitness, Fleet, Util}
+  alias RobotsAreFun.Inventory.Load
+  alias RobotsAreFun.Fleet.Robot
 
   @x_max_env "X_MAX"
   @y_max_env "Y_MAX"
@@ -16,12 +18,56 @@ defmodule RobotsAreFun do
   @default_y_max 100
 
   @doc """
-  Given a `RobotsAreFun.Load`, assigns the most suitable `RobotsAreFun.Robot` to pick it up.
+  Returns the list of `RobotsAreFun.Fleet.Robot` in the `RobotsAreFun.Inventory.Load`.
 
   ## Examples
 
-      iex> load = %RobotsAreFun.Load{load_id: "1", x: 23, y: 55}
-      ...>
+      iex> RobotsAreFun.show_fleet(get_fleet_fn: &RobotsAreFun.TestData.get_robots/0)
+      {:ok,
+        [
+          %RobotsAreFun.Fleet.Robot{id: "111", battery_level: 21, x: 34, y: 86},
+          %RobotsAreFun.Fleet.Robot{id: "14", battery_level: 66, x: 57, y: 88},
+          %RobotsAreFun.Fleet.Robot{id: "222", battery_level: 66, x: 27, y: 86},
+          %RobotsAreFun.Fleet.Robot{id: "25", battery_level: 51, x: 24, y: 8},
+          %RobotsAreFun.Fleet.Robot{id: "27", battery_level: 91, x: 75, y: 11},
+          %RobotsAreFun.Fleet.Robot{id: "333", battery_level: 70, x: 26, y: 87},
+          %RobotsAreFun.Fleet.Robot{id: "43", battery_level: 59, x: 49, y: 20},
+          %RobotsAreFun.Fleet.Robot{id: "47", battery_level: 0, x: 51, y: 38},
+          %RobotsAreFun.Fleet.Robot{id: "7", battery_level: 24, x: 13, y: 66},
+          %RobotsAreFun.Fleet.Robot{id: "74", battery_level: 45, x: 59, y: 43},
+          %RobotsAreFun.Fleet.Robot{id: "75", battery_level: 97, x: 5, y: 33},
+          %RobotsAreFun.Fleet.Robot{id: "8", battery_level: 62, x: 91, y: 96},
+          %RobotsAreFun.Fleet.Robot{id: "90", battery_level: 28, x: 91, y: 62}
+        ]
+      }
+
+  """
+  @spec show_fleet(keyword()) :: {:ok, [Robot.t()]} | {:error, any()}
+  def show_fleet(opts \\ []) do
+    get_fleet_fn = Keyword.get(opts, :get_fleet_fn, &Fleet.get_fleet/0)
+    case get_fleet_fn.() do
+      {:ok, fleet} when is_map(fleet) ->
+        {:ok, Map.values(fleet) |> Enum.sort_by(&(&1.id))}
+
+      {:ok, fleet} when is_list(fleet) ->
+        {:ok, fleet |> Enum.sort_by(&(&1.id))}
+
+      {:ok, _invalid_fleet} ->
+        {:error, "invalid fleet"}
+
+      error ->
+        error
+    end
+  end
+
+  @doc """
+  Given a `RobotsAreFun.Inventory.Load`, assigns the most suitable `RobotsAreFun.Fleet.Robot` to pick it up.
+
+  ## Examples
+
+      iex> load = RobotsAreFun.TestData.get_first_load()
+      ...> RobotsAreFun.assign_robot_to_load(load, get_fleet_fn: &RobotsAreFun.TestData.get_robots/0)
+      {:ok, %RobotsAreFun.Fleet.Robot{id: "222", battery_level: 66, x: 27, y: 86}}
 
   """
   @spec assign_robot_to_load(Load.t(), keyword()) :: {:ok, Robot.t()} | {:error, any()}
@@ -32,9 +78,9 @@ defmodule RobotsAreFun do
 
     with {:ok, fleet} <- get_fleet_fn.(),
          {:ok, [best_fit | _]} <- assess_robots(fleet, load),
-         %Robot{} = robot <- Map.get(fleet, best_fit.robot_id)
+         %Robot{} = robot <- Map.get(fleet, best_fit.id)
     do
-      Logger.info(msg: "Assigned robot: #{robot.robot_id}", robot: robot, distance: best_fit.distance, fitness: best_fit.fitness)
+      Logger.info(msg: "Assigned robot: #{robot.id}", robot: robot, distance: best_fit.distance, fitness: best_fit.fitness)
       {:ok, robot}
     else
       {:error, error} ->
@@ -46,7 +92,7 @@ defmodule RobotsAreFun do
   end
 
   def assign_robot_to_load(load, _opts) do
-    Logger.error(msg: "invalid %RobotsAreFun.Load{}", load: load)
+    Logger.error(msg: "invalid %RobotsAreFun.Inventory.Load{}", load: load)
     {:error, "failed to assign robot"}
   end
 
@@ -56,10 +102,10 @@ defmodule RobotsAreFun do
 
     robot_fits =
       robots
-      |> Enum.reduce([], fn {robot_id, robot}, acc ->
+      |> Enum.reduce([], fn {id, robot}, acc ->
         case Fitness.assess_robot_fitness(robot, load, options) do
           {:ok, {distance, fitness}} ->
-            [%{robot_id: robot_id, distance: distance, fitness: fitness} | acc]
+            [%{id: id, distance: distance, fitness: fitness} | acc]
 
           :error ->
             acc

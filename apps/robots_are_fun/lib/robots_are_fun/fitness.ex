@@ -1,12 +1,14 @@
 defmodule RobotsAreFun.Fitness do
   @moduledoc """
-  Determines a `RobotsAreFun.Robot`'s fitness for picking up a given `RobotsAreFun.Load`.
+  Determines a `RobotsAreFun.Fleet.Robot`'s fitness for picking up a given `RobotsAreFun.Inventory.Load`.
   """
 
-  import RobotsAreFun.Load, only: [valid_load?: 1]
-  import RobotsAreFun.Robot, only: [valid_robot?: 1]
-  import RobotsAreFun.Position, only: [position: 1]
-  alias RobotsAreFun.{Load, Robot, Util}
+  import RobotsAreFun.Util.Position, only: [position: 1]
+  import RobotsAreFun.Fleet.Robot, only: [valid_robot?: 1]
+  import RobotsAreFun.Inventory.Load, only: [valid_load?: 1]
+  alias RobotsAreFun.Util
+  alias RobotsAreFun.Inventory.Load
+  alias RobotsAreFun.Fleet.Robot
 
   @battery_max 100
   @threshold 10
@@ -19,7 +21,7 @@ defmodule RobotsAreFun.Fitness do
   @typep fitness() :: float()
 
   @doc """
-  Assesses a `RobotsAreFun.Robot`'s fitness for picking up a `RobotsAreFun.Load`.
+  Assesses a `RobotsAreFun.Fleet.Robot`'s fitness for picking up a `RobotsAreFun.Inventory.Load`.
 
   Returns the calculated `distance` to the `load`, and its weighted `fitness` score.
 

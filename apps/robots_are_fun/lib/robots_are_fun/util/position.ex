@@ -1,4 +1,4 @@
-defprotocol RobotsAreFun.Position do
+defprotocol RobotsAreFun.Util.Position do
   @moduledoc """
   A protocol that can be shared by anything that has an `{x, y}` position.
   """
@@ -10,7 +10,7 @@ defprotocol RobotsAreFun.Position do
   def position(value)
 end
 
-defimpl RobotsAreFun.Position, for: Any do
+defimpl RobotsAreFun.Util.Position, for: Any do
   def position(map) when is_map_key(map, :x) and is_map_key(map, :y),
     do: {map.x, map.y}
 

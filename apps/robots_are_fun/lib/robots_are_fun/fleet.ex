@@ -3,14 +3,14 @@ defmodule RobotsAreFun.Fleet do
   Fetch the fleet of default robots from SVT endpoint.
   """
   require Logger
-  alias RobotsAreFun.Robot
+  alias RobotsAreFun.Fleet.Robot
 
   @fleet_url_env "FLEET_URL"
 
   @default_url "https://60c8ed887dafc90017ffbd56.mockapi.io/robots"
 
   @doc """
-  Returns the fleet of `RobotsAreFun.Robot`s in a `map()`.
+  Returns the fleet of `RobotsAreFun.Fleet.Robot`s in a `map()`.
   """
   @spec get_fleet() :: {:ok, map()} | {:error, any()}
   def get_fleet() do
@@ -32,7 +32,7 @@ defmodule RobotsAreFun.Fleet do
   defp process_fleet(fleet) when is_list(fleet) do
     Enum.reduce(fleet, Map.new(), fn next, acc ->
       case process_robot(next) do
-        {:ok, robot} -> Map.put(acc, robot.robot_id, robot)
+        {:ok, robot} -> Map.put(acc, robot.id, robot)
         :error -> acc
       end
     end)
@@ -40,13 +40,13 @@ defmodule RobotsAreFun.Fleet do
 
   @spec process_robot(map()) :: {:ok, Robot.t()} | :error
   defp process_robot(robot) when is_map(robot) do
-    with {:ok, robot_id} <- Access.fetch(robot, "robotId"),
+    with {:ok, id} <- Access.fetch(robot, "robotId"),
          {:ok, battery_level} <- Access.fetch(robot, "batteryLevel"),
          {:ok, x} <- Access.fetch(robot, "x"),
          {:ok, y} <- Access.fetch(robot, "y") do
       {:ok,
        %Robot{
-         robot_id: robot_id,
+         id: id,
          battery_level: battery_level,
          x: x,
          y: y

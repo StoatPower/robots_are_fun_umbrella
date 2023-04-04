@@ -20,6 +20,12 @@ defmodule RobotsAreFunWeb.Router do
     get "/", PageController, :home
   end
 
+  scope "/api", RobotsAreFunWeb do
+    pipe_through :api
+
+
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", RobotsAreFunWeb do
   #   pipe_through :api
