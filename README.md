@@ -2,9 +2,9 @@
 
 ## Preamble
 
-Though I may be stretching the requirement for for the API to be written in 
-"Javascript, Typescript, .NET Core, _or a similar language_", I chose to do so
-for a few reasons:
+This project was completing with Elixir, and though I may be stretching the 
+requirement by for the API to be written in "Javascript, Typescript, .NET Core, _or a similar language_", 
+I chose to do so for a few reasons:
 
 * **Primarily** - it happens to be the only language I've been working with on a daily basis for 
     the last year and a half, so it's the most reasonable way for me to complete a take-home at
